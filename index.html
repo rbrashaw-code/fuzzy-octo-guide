@@ -641,7 +641,7 @@ const PROPS = [
   },
   {
     id:1, name:"Private Cul-de-Sac Golf Manor", price:"R 13,900,000", ref:"#7462835",
-    ytId:"",
+    ytId:"QgsKbcda2Zc",
     desc:"A commanding manor residence on an exclusive cul-de-sac, offering uninterrupted golf course views, five generous bedrooms, a private pool, and finishes that rival the finest international properties.",
     tags:["Cul-de-Sac","5 Bed","4 Bath","Pool"],
     details:[
@@ -654,7 +654,7 @@ const PROPS = [
   },
   {
     id:2, name:"Modern Cinema & Gym Residence", price:"R 8,500,000", ref:"#7452295",
-    ytId:"",
+    ytId:"JMCMbTwAkEM",
     desc:"A contemporary architectural statement with a dedicated home cinema, fully equipped private gym, and a chef's kitchen — designed for those who demand exceptional lifestyle facilities at home.",
     tags:["Cinema Room","Gym","4 Bed","Modern"],
     details:[
@@ -667,7 +667,7 @@ const PROPS = [
   },
   {
     id:3, name:"Entertainer's Greenbelt Home", price:"R 4,800,000", ref:"#7468601",
-    ytId:"",
+    ytId:"Zboutne85Mg",
     desc:"Backing directly onto indigenous greenbelt, this home offers rare natural privacy within the estate — designed for entertaining, with open-plan living flowing to an expansive deck, fire pit, and boma.",
     tags:["Greenbelt","4 Bed","Boma","Private"],
     details:[
@@ -690,7 +690,18 @@ PROPS.forEach(p => {
   const d = document.createElement('div');
   d.className = 'listing-item';
   d.id = 'li-' + p.id;
+  const coverImgs = [
+    'https://www.baroquerealestate.com/motorImages9/800/15061625.jpg',
+    'https://www.baroquerealestate.com/motorImages9/800/15080370.jpg',
+    'https://www.baroquerealestate.com/motorImages9/800/15065545.jpg',
+    'https://www.baroquerealestate.com/motorImages9/800/15095843.jpg',
+  ];
   d.innerHTML = `
+    <div style="width:100%;height:140px;overflow:hidden;margin-bottom:14px;background:#111;">
+      <img src="${coverImgs[p.id]}" style="width:100%;height:100%;object-fit:cover;opacity:0.75;transition:opacity 0.3s;" 
+        onmouseover="this.style.opacity='0.9'" onmouseout="this.style.opacity='0.75'"
+        onerror="this.style.display='none'" />
+    </div>
     <div class="li-ref">Ref ${p.ref}</div>
     <div class="li-name">${p.name}</div>
     <div class="li-price">${p.price}</div>
@@ -737,11 +748,29 @@ function openTour(id) {
   ).join('');
   document.getElementById('loc-text').textContent = p.location;
 
-  // Gallery
+  // Gallery - use real images from baroque website
+  const galleryImgs = {
+    0: [
+      'https://www.baroquerealestate.com/motorImages9/800/15061625.jpg',
+    ],
+    1: [
+      'https://www.baroquerealestate.com/motorImages9/800/15080370.jpg',
+    ],
+    2: [
+      'https://www.baroquerealestate.com/motorImages9/800/15065545.jpg',
+    ],
+    3: [
+      'https://www.baroquerealestate.com/motorImages9/800/15095843.jpg',
+    ]
+  };
+  const imgs = galleryImgs[id] || [];
   const rooms = ['Living & Dining','Master Suite','Kitchen','Pool Area','Garden','Entrance Hall'];
-  document.getElementById('gallery-grid').innerHTML = rooms.map(r =>
-    `<div class="g-cell"><span>${r}</span></div>`
-  ).join('');
+  document.getElementById('gallery-grid').innerHTML = imgs.map((src, i) =>
+    `<div class="g-cell" style="grid-column:span 3;aspect-ratio:16/7;background:#111;">
+      <img src="${src}" style="width:100%;height:100%;object-fit:cover;opacity:0.85;" 
+        onerror="this.parentNode.innerHTML='<span>${rooms[i]||''}</span>'" />
+    </div>`
+  ).concat(rooms.slice(imgs.length).map(r => `<div class="g-cell"><span>${r}</span></div>`)).join('');
 
   // Other homes
   document.getElementById('other-row').innerHTML = PROPS.filter(x => x.id !== id).map(x =>
