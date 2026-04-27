@@ -1,0 +1,546 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Baroque Real Estate — Virtual Show Houses · Copperleaf</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Bodoni+Moda:ital,opsz,wght@0,6..96,300;0,6..96,400;1,6..96,300;1,6..96,400&family=Montserrat:wght@200;300;400&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --black:#0f0f0f; --black-soft:#1a1a1a; --black-mid:#222222; --black-card:#1c1c1c;
+    --pt-100:#f8f5f1; --pt-200:#ede8e0; --pt-300:#d8d1c6; --pt-400:#c0b8ac;
+    --pt-500:#a09890; --pt-600:#7a726a; --pt-700:#504a44;
+    --border:1px solid rgba(220,212,200,0.18);
+    --border-mid:1px solid rgba(220,212,200,0.3);
+    --ease:cubic-bezier(0.25,0.46,0.45,0.94);
+    --font-d:'Bodoni Moda',serif; --font-b:'Montserrat',sans-serif;
+  }
+  *{margin:0;padding:0;box-sizing:border-box;}
+  html,body{height:100%;overflow:hidden;}
+  body{background:var(--black);color:var(--pt-300);font-family:var(--font-b);font-weight:300;display:flex;flex-direction:column;}
+  ::-webkit-scrollbar{width:3px;}
+  ::-webkit-scrollbar-track{background:var(--black);}
+  ::-webkit-scrollbar-thumb{background:var(--pt-700);}
+
+  /* TOPBAR */
+  .topbar{
+    display:flex;align-items:center;justify-content:space-between;
+    padding:18px 40px;border-bottom:var(--border);flex-shrink:0;background:var(--black);
+  }
+  .logo-name{font-family:var(--font-d);font-size:20px;font-weight:400;letter-spacing:0.22em;text-transform:uppercase;color:var(--pt-100);line-height:1;display:block;}
+  .logo-tag{font-size:7px;font-weight:300;letter-spacing:0.45em;text-transform:uppercase;color:var(--pt-600);display:block;margin-top:3px;}
+  .topbar-right{font-size:8px;font-weight:300;letter-spacing:0.3em;text-transform:uppercase;color:var(--pt-400);}
+
+  /* MAIN */
+  .main{display:flex;flex:1;overflow:hidden;min-height:0;}
+
+  /* SIDEBAR */
+  .sidebar{
+    width:280px;flex-shrink:0;border-right:var(--border);
+    display:flex;flex-direction:column;overflow:hidden;background:var(--black-soft);
+  }
+  .sidebar-head{padding:16px 20px 12px;border-bottom:var(--border);flex-shrink:0;}
+  .sidebar-head p{font-size:7px;font-weight:400;letter-spacing:0.38em;text-transform:uppercase;color:var(--pt-400);}
+  .listings{flex:1;overflow-y:auto;}
+  .listing-item{padding:0 0 16px;border-bottom:var(--border);cursor:pointer;transition:background 0.3s;border-left:2px solid transparent;}
+  .listing-item:hover{background:rgba(212,206,197,0.03);}
+  .listing-item.active{background:rgba(212,206,197,0.05);border-left-color:var(--pt-400);}
+  .li-thumb{width:100%;height:120px;overflow:hidden;background:var(--black-mid);}
+  .li-thumb img{width:100%;height:100%;object-fit:cover;opacity:0.7;transition:opacity 0.3s;display:block;}
+  .listing-item:hover .li-thumb img{opacity:0.85;}
+  .li-body{padding:12px 16px 0;}
+  .li-ref{font-size:7px;font-weight:400;letter-spacing:0.28em;text-transform:uppercase;color:var(--pt-600);margin-bottom:5px;}
+  .li-name{font-family:var(--font-d);font-size:14px;font-weight:400;color:var(--pt-100);line-height:1.2;margin-bottom:5px;}
+  .li-price{font-size:10px;letter-spacing:0.12em;color:var(--pt-300);margin-bottom:8px;}
+  .li-tags{display:flex;gap:4px;flex-wrap:wrap;margin-bottom:10px;}
+  .li-tag{font-size:6px;font-weight:400;letter-spacing:0.15em;text-transform:uppercase;padding:3px 7px;border:1px solid rgba(220,212,200,0.25);color:var(--pt-400);}
+  .li-cta{font-size:7px;font-weight:400;letter-spacing:0.25em;text-transform:uppercase;color:var(--pt-500);display:flex;align-items:center;gap:6px;opacity:0;transition:opacity 0.3s;}
+  .listing-item:hover .li-cta,.listing-item.active .li-cta{opacity:1;}
+  .li-arrow{transition:transform 0.3s;display:inline-block;}
+  .listing-item:hover .li-arrow{transform:translateX(4px);}
+
+  /* TOUR AREA */
+  .tour-area{flex:1;display:flex;flex-direction:column;overflow:hidden;min-width:0;}
+
+  /* Empty state */
+  .empty-state{flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:16px;opacity:0.35;}
+  .empty-state p{font-family:var(--font-d);font-size:22px;font-weight:300;font-style:italic;color:var(--pt-500);}
+  .empty-state span{font-size:8px;letter-spacing:0.3em;text-transform:uppercase;color:var(--pt-700);}
+
+  /* Tour wrap */
+  .tour-wrap{display:none;flex:1;flex-direction:column;overflow:hidden;min-height:0;}
+  .tour-wrap.active{display:flex;}
+
+  .tour-prop-bar{
+    padding:12px 24px;border-bottom:var(--border);
+    display:flex;align-items:center;justify-content:space-between;
+    flex-shrink:0;background:var(--black-soft);
+  }
+  .tpb-name{font-family:var(--font-d);font-size:18px;font-weight:400;color:var(--pt-100);}
+  .tpb-meta{font-size:8px;letter-spacing:0.2em;color:var(--pt-300);margin-top:2px;}
+
+  .tour-body{display:grid;grid-template-columns:1fr 340px;flex:1;overflow:hidden;min-height:0;}
+
+  /* Tour left */
+  .tour-left{display:flex;flex-direction:column;border-right:var(--border);overflow:hidden;min-width:0;}
+  .tour-tabs{display:flex;border-bottom:var(--border);flex-shrink:0;}
+  .ttab{
+    padding:12px 22px;font-size:8px;font-weight:400;letter-spacing:0.26em;text-transform:uppercase;
+    color:var(--pt-600);cursor:pointer;border:none;border-bottom:2px solid transparent;
+    background:none;transition:all 0.3s;font-family:var(--font-b);
+  }
+  .ttab.active{color:var(--pt-100);border-bottom-color:var(--pt-300);}
+  .ttab:hover:not(.active){color:var(--pt-300);}
+
+  .tour-panes{flex:1;position:relative;overflow:hidden;}
+  .pane{position:absolute;inset:0;display:none;flex-direction:column;overflow-y:auto;}
+  .pane.active{display:flex;}
+  .pane::-webkit-scrollbar{width:2px;}
+  .pane::-webkit-scrollbar-thumb{background:var(--pt-700);}
+
+  /* Video */
+  .vid-wrap{position:relative;width:100%;padding-top:56.25%;flex-shrink:0;background:var(--black-mid);}
+  .vid-wrap iframe{position:absolute;inset:0;width:100%;height:100%;border:none;}
+  .vid-ph{position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:14px;background:var(--black-mid);}
+  .vid-ph-ring{width:60px;height:60px;border-radius:50%;border:1px solid rgba(212,206,197,0.18);display:flex;align-items:center;justify-content:center;color:var(--pt-500);}
+  .vid-ph p{font-size:8px;letter-spacing:0.25em;text-transform:uppercase;color:var(--pt-600);}
+  .vid-desc{padding:24px 28px;}
+  .vid-desc p{font-size:12px;letter-spacing:0.04em;line-height:2;color:var(--pt-200);}
+
+  /* Gallery */
+  .gallery-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:3px;padding:3px;}
+  .g-cell{aspect-ratio:4/3;background:var(--black-mid);overflow:hidden;cursor:pointer;position:relative;}
+  .g-cell:first-child{grid-column:span 3;aspect-ratio:16/6;}
+  .g-cell img{width:100%;height:100%;object-fit:cover;opacity:0.8;transition:opacity 0.3s;display:block;}
+  .g-cell:hover img{opacity:1;}
+  .g-cell-label{position:absolute;bottom:8px;left:10px;font-size:7px;letter-spacing:0.2em;text-transform:uppercase;color:var(--pt-400);}
+
+  /* Details */
+  .details-pad{padding:28px;}
+  .det-grid{display:grid;grid-template-columns:1fr 1fr;gap:16px;margin-bottom:32px;}
+  .det-item label{font-size:7px;font-weight:400;letter-spacing:0.3em;text-transform:uppercase;color:var(--pt-600);display:block;margin-bottom:5px;}
+  .det-item span{font-family:var(--font-d);font-size:15px;font-weight:400;color:var(--pt-100);}
+  .det-sec{font-size:7px;letter-spacing:0.38em;text-transform:uppercase;color:var(--pt-600);padding-bottom:10px;border-bottom:var(--border);margin-bottom:12px;}
+  .fin-list{list-style:none;display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:28px;}
+  .fin-list li{font-size:10px;letter-spacing:0.03em;color:var(--pt-200);line-height:1.6;display:flex;gap:8px;align-items:flex-start;}
+  .fin-list li::before{content:'—';color:var(--pt-700);font-size:9px;flex-shrink:0;margin-top:1px;}
+  .loc-text{font-size:11px;letter-spacing:0.04em;line-height:1.9;color:var(--pt-200);}
+
+  /* ALEXANDRA */
+  .alex-panel{display:flex;flex-direction:column;background:var(--black-card);overflow:hidden;min-width:0;}
+  .alex-head{padding:16px 20px 12px;border-bottom:var(--border);flex-shrink:0;}
+  .alex-av-row{display:flex;align-items:center;gap:10px;margin-bottom:8px;}
+  .alex-av{width:40px;height:40px;border-radius:50%;border:var(--border-mid);background:var(--black-mid);display:flex;align-items:center;justify-content:center;font-family:var(--font-d);font-size:16px;font-weight:300;color:var(--pt-400);flex-shrink:0;}
+  .alex-name{font-family:var(--font-d);font-size:17px;font-weight:400;color:var(--pt-100);}
+  .alex-role{font-size:7px;letter-spacing:0.2em;text-transform:uppercase;color:var(--pt-600);margin-top:1px;}
+  .alex-status{display:flex;align-items:center;gap:6px;font-size:7px;letter-spacing:0.15em;text-transform:uppercase;color:var(--pt-400);}
+  .s-dot{width:5px;height:5px;border-radius:50%;background:#5a8f72;animation:sPulse 2.5s ease-in-out infinite;}
+  @keyframes sPulse{0%,100%{opacity:1;}50%{opacity:0.35;}}
+  .voice-row{display:flex;gap:7px;margin-top:10px;}
+  .v-btn{flex:1;padding:8px 10px;background:rgba(212,206,197,0.03);border:var(--border);color:var(--pt-500);font-family:var(--font-b);font-size:7px;font-weight:400;letter-spacing:0.22em;text-transform:uppercase;cursor:pointer;display:flex;align-items:center;justify-content:center;gap:5px;transition:all 0.3s;}
+  .v-btn:hover{border-color:rgba(212,206,197,0.25);color:var(--pt-300);}
+  .v-btn.listening{border-color:rgba(170,70,70,0.45);color:#b07070;background:rgba(170,70,70,0.06);animation:lPulse 1.1s ease-in-out infinite;}
+  .v-btn.speaking{border-color:rgba(90,143,114,0.4);color:#5a8f72;}
+  @keyframes lPulse{0%,100%{box-shadow:0 0 0 0 rgba(170,70,70,0.2);}50%{box-shadow:0 0 0 4px rgba(170,70,70,0.06);}}
+
+  .chat-msgs{flex:1;overflow-y:auto;padding:14px 18px;display:flex;flex-direction:column;gap:11px;min-height:0;}
+  .chat-msgs::-webkit-scrollbar{width:2px;}
+  .chat-msgs::-webkit-scrollbar-thumb{background:rgba(212,206,197,0.08);}
+  .msg{display:flex;gap:8px;animation:mIn 0.3s ease;}
+  @keyframes mIn{from{opacity:0;transform:translateY(6px);}to{opacity:1;transform:translateY(0);}}
+  .msg.user{flex-direction:row-reverse;}
+  .msg-av{width:24px;height:24px;border-radius:50%;flex-shrink:0;margin-top:2px;display:flex;align-items:center;justify-content:center;font-family:var(--font-d);font-size:9px;}
+  .msg-av.a{background:rgba(212,206,197,0.05);border:1px solid rgba(212,206,197,0.1);color:var(--pt-400);}
+  .msg-av.u{background:rgba(212,206,197,0.04);border:1px solid rgba(212,206,197,0.08);color:var(--pt-500);}
+  .msg-bub{max-width:82%;padding:10px 13px;font-size:11px;letter-spacing:0.02em;line-height:1.7;}
+  .msg:not(.user) .msg-bub{background:rgba(220,212,200,0.08);border:1px solid rgba(220,212,200,0.15);color:var(--pt-200);border-radius:0 6px 6px 6px;}
+  .msg.user .msg-bub{background:rgba(220,212,200,0.1);border:1px solid rgba(220,212,200,0.18);color:var(--pt-100);text-align:right;border-radius:6px 0 6px 6px;}
+  .typing{display:flex;gap:4px;padding:2px 0;}
+  .t-dot{width:3px;height:3px;border-radius:50%;background:var(--pt-600);opacity:0.5;animation:tD 1.3s ease-in-out infinite;}
+  .t-dot:nth-child(2){animation-delay:0.2s;}.t-dot:nth-child(3){animation-delay:0.4s;}
+  @keyframes tD{0%,100%{transform:translateY(0);opacity:0.5;}50%{transform:translateY(-4px);opacity:1;}}
+
+  .chips-wrap{padding:0 18px 10px;display:flex;flex-direction:column;gap:4px;flex-shrink:0;}
+  .chips-wrap p{font-size:7px;letter-spacing:0.3em;text-transform:uppercase;color:var(--pt-500);margin-bottom:2px;}
+  .chip{background:rgba(220,212,200,0.05);border:var(--border);padding:6px 11px;font-family:var(--font-b);font-size:9px;font-weight:300;color:var(--pt-300);cursor:pointer;text-align:left;transition:all 0.3s;}
+  .chip:hover{border-color:rgba(212,206,197,0.22);color:var(--pt-400);background:rgba(212,206,197,0.02);}
+
+  .other-props{padding:8px 18px 10px;border-top:var(--border);flex-shrink:0;}
+  .other-props p{font-size:7px;letter-spacing:0.3em;text-transform:uppercase;color:var(--pt-500);margin-bottom:7px;}
+  .other-row{display:flex;gap:6px;overflow-x:auto;padding-bottom:2px;}
+  .other-row::-webkit-scrollbar{height:1px;}
+  .o-card{flex-shrink:0;width:110px;background:rgba(212,206,197,0.02);border:var(--border);cursor:pointer;transition:all 0.3s;overflow:hidden;}
+  .o-card:hover{border-color:rgba(212,206,197,0.18);background:rgba(212,206,197,0.04);}
+  .o-card img{width:100%;height:55px;object-fit:cover;opacity:0.65;display:block;}
+  .o-card-body{padding:6px 8px;}
+  .ocn{font-size:8px;color:var(--pt-200);margin-bottom:2px;line-height:1.3;display:block;}
+  .ocp{font-size:7px;letter-spacing:0.08em;color:var(--pt-400);}
+
+  .chat-in-wrap{padding:10px 14px 14px;border-top:var(--border);flex-shrink:0;}
+  .chat-in-row{display:flex;gap:6px;align-items:flex-end;}
+  .chat-in{flex:1;background:rgba(255,255,255,0.06);border:var(--border-mid);padding:9px 12px;font-family:var(--font-b);font-size:11px;font-weight:300;color:var(--pt-100);resize:none;max-height:80px;outline:none;transition:border-color 0.3s;line-height:1.5;}
+  .chat-in::placeholder{color:var(--pt-700);}
+  .chat-in:focus{border-color:rgba(212,206,197,0.22);}
+  .send-btn{width:38px;height:38px;flex-shrink:0;background:var(--pt-300);border:none;cursor:pointer;display:flex;align-items:center;justify-content:center;transition:background 0.3s;}
+  .send-btn:hover{background:var(--pt-200);}
+  .send-btn svg{color:var(--black);}
+</style>
+</head>
+<body>
+
+<div class="topbar">
+  <div>
+    <span class="logo-name">Baroque</span>
+    <span class="logo-tag">Real Estate · Virtual Show Houses</span>
+  </div>
+  <div class="topbar-right">Copperleaf Golf &amp; Country Estate · Centurion</div>
+</div>
+
+<div class="main">
+  <div class="sidebar">
+    <div class="sidebar-head"><p>Select a Residence to Begin</p></div>
+    <div class="listings" id="listings"></div>
+  </div>
+
+  <div class="tour-area">
+    <div class="empty-state" id="empty-state">
+      <svg width="44" height="44" viewBox="0 0 48 48" fill="none" stroke="currentColor" stroke-width="0.8">
+        <path d="M6 40L24 10L42 40Z"/><rect x="18" y="28" width="12" height="12"/>
+        <line x1="24" y1="10" x2="24" y2="4"/><line x1="21" y1="7" x2="27" y2="7"/>
+      </svg>
+      <p>Select a residence to begin</p>
+      <span>Virtual tours powered by Alexandra</span>
+    </div>
+
+    <div class="tour-wrap" id="tour-wrap">
+      <div class="tour-prop-bar">
+        <div>
+          <div class="tpb-name" id="tpb-name"></div>
+          <div class="tpb-meta" id="tpb-meta"></div>
+        </div>
+      </div>
+      <div class="tour-body">
+        <div class="tour-left">
+          <div class="tour-tabs">
+            <button class="ttab active" onclick="swTab('video',this)">Video Tour</button>
+            <button class="ttab" onclick="swTab('gallery',this)">Gallery</button>
+            <button class="ttab" onclick="swTab('details',this)">Details &amp; Finishes</button>
+          </div>
+          <div class="tour-panes">
+            <div class="pane active" id="pane-video">
+              <div class="vid-wrap">
+                <div class="vid-ph" id="vid-ph">
+                  <div class="vid-ph-ring"><svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor"><polygon points="9,6 20,12 9,18"/></svg></div>
+                  <p>Video tour coming soon</p>
+                </div>
+                <iframe id="vid-frame" src="" allowfullscreen style="display:none;"></iframe>
+              </div>
+              <div class="vid-desc"><p id="vid-desc"></p></div>
+            </div>
+            <div class="pane" id="pane-gallery">
+              <div class="gallery-grid" id="gallery-grid"></div>
+            </div>
+            <div class="pane" id="pane-details">
+              <div class="details-pad">
+                <div class="det-grid" id="det-grid"></div>
+                <div class="det-sec">Interior Finishes</div>
+                <ul class="fin-list" id="fin-list"></ul>
+                <div class="det-sec">Location &amp; Surrounds</div>
+                <p class="loc-text" id="loc-text"></p>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div class="alex-panel">
+          <div class="alex-head">
+            <div class="alex-av-row">
+              <div class="alex-av">A</div>
+              <div>
+                <div class="alex-name">Alexandra</div>
+                <div class="alex-role">AI Property Concierge · Baroque Real Estate</div>
+              </div>
+            </div>
+            <div class="alex-status"><div class="s-dot"></div>Available now</div>
+            <div class="voice-row">
+              <button class="v-btn" id="vbtn" onclick="toggleListen()">
+                <svg width="11" height="11" viewBox="0 0 20 20" fill="currentColor"><path d="M10 1a3 3 0 0 0-3 3v6a3 3 0 0 0 6 0V4a3 3 0 0 0-3-3zm-5 9a5 5 0 0 0 10 0h-2a3 3 0 0 1-6 0H5zm4 5.9V18H8v-2.1a7 7 0 0 1-5.95-5.9h2.02A5 5 0 0 0 14.93 10H17a7 7 0 0 1-6 6.9V18h-2v-2.1z"/></svg>
+                Speak to Alexandra
+              </button>
+              <button class="v-btn" id="vbtn-stop" onclick="stopSpeak()" style="display:none;">
+                <svg width="11" height="11" viewBox="0 0 20 20" fill="currentColor"><rect x="4" y="4" width="12" height="12" rx="1"/></svg>
+                Stop
+              </button>
+            </div>
+          </div>
+          <div class="chat-msgs" id="chat-msgs"></div>
+          <div class="chips-wrap" id="chips-wrap"><p>Ask Alexandra</p></div>
+          <div class="other-props">
+            <p>Other Copperleaf Residences</p>
+            <div class="other-row" id="other-row"></div>
+          </div>
+          <div class="chat-in-wrap">
+            <div class="chat-in-row">
+              <textarea class="chat-in" id="chat-in" rows="2" placeholder="Ask about this home, finishes, the estate…" onkeydown="handleKey(event)"></textarea>
+              <button class="send-btn" onclick="sendMsg()">
+                <svg width="14" height="14" viewBox="0 0 20 20" fill="currentColor"><path d="M3 10l14-8-6 8 6 8L3 10z"/></svg>
+              </button>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+const API_KEY = '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';
+const BASE_IMG = 'https://www.baroquerealestate.com/motorImages9/800/';
+
+const PROPS = [
+  {
+    id:0, name:"Fairway Luxury Residence", price:"R 6,200,000", ref:"#7498497",
+    ytId:"",
+    cover: BASE_IMG+'15061625.jpg',
+    images:[BASE_IMG+'15061625.jpg',BASE_IMG+'15061626.jpg',BASE_IMG+'15061627.jpg',BASE_IMG+'15061628.jpg',BASE_IMG+'15061629.jpg',BASE_IMG+'15061630.jpg'],
+    labels:['Exterior','Living Area','Kitchen','Master Suite','Pool','Garden'],
+    desc:"A beautifully appointed four-bedroom residence positioned directly on the 7th fairway. Floor-to-ceiling glass frames sweeping golf course views, while seamless indoor-outdoor flow leads to a heated pool and entertainer's terrace.",
+    tags:["Golf Frontage","4 Bed","3 Bath","Solar"],
+    details:[{l:"Bedrooms",v:"4"},{l:"Bathrooms",v:"3"},{l:"Garages",v:"2"},{l:"Erf Size",v:"780 m²"},{l:"Floor Area",v:"380 m²"},{l:"Solar",v:"8 kW"},{l:"Borehole",v:"Yes"},{l:"Levy",v:"R4,200/mo"}],
+    finishes:["Italian porcelain tile throughout","Custom German kitchen cabinetry","Smeg appliance suite","Imported marble countertops","Heated towel rails — all bathrooms","Underfloor heating — living areas","Automated gate & lighting","Fibre ready — 1 Gbps"],
+    location:"Positioned on the 7th fairway with a north-facing aspect. Walking distance to the Copperleaf Clubhouse. 8 minutes to Centurion Mall, 25 minutes to Sandton, 20 minutes to Pretoria CBD.",
+    ctx:`You are Alexandra, a refined AI property concierge for Baroque Real Estate, specialists in Copperleaf Golf & Country Estate, Centurion, South Africa. You speak with warm authority as a knowledgeable luxury property professional. You are presenting the Fairway Luxury Residence at R6.2M (Ref #7498497): 4 bed, 3 bath, 2 garages, 380m² on 780m² erf, direct 7th fairway frontage, north-facing, heated pool, 8kW solar, borehole, Italian porcelain tile, German kitchen, Smeg appliances, marble countertops, underfloor heating, automated systems. Monthly levies R4,200. Bond approximately R62,000 per month. Estate: Gary Player golf course, 24-hour security, clubhouse, restaurant, gym, tennis. 25 min to Sandton, 20 min to Pretoria. If this home does not suit, suggest: Cul-de-Sac Golf Manor R13.9M (#7462835), Cinema & Gym R8.5M (#7452295), Greenbelt Home R4.8M (#7468601). Always respond in flowing, elegant prose. Never use bullet points.`
+  },
+  {
+    id:1, name:"Private Cul-de-Sac Golf Manor", price:"R 13,900,000", ref:"#7462835",
+    ytId:"QgsKbcda2Zc",
+    cover: BASE_IMG+'15080370.jpg',
+    images:[BASE_IMG+'15080370.jpg',BASE_IMG+'15080371.jpg',BASE_IMG+'15080372.jpg',BASE_IMG+'15080373.jpg',BASE_IMG+'15080374.jpg',BASE_IMG+'15080375.jpg'],
+    labels:['Exterior','Living Area','Kitchen','Master Suite','Pool','Garden'],
+    desc:"A commanding manor residence on an exclusive cul-de-sac, offering uninterrupted golf course views, four generous bedrooms, a private pool, and finishes that rival the finest international properties.",
+    tags:["Cul-de-Sac","4 Bed","4 Bath","Pool"],
+    details:[{l:"Bedrooms",v:"4"},{l:"Bathrooms",v:"4"},{l:"Garages",v:"4"},{l:"Erf Size",v:"1,505 m²"},{l:"Floor Area",v:"732 m²"},{l:"Solar",v:"Yes"},{l:"Borehole",v:"Yes"},{l:"Levy",v:"R3,650/mo"}],
+    finishes:["Tiled floors throughout","Walk-in fridges & pantry","Temperature-controlled wine room","Cinema room — automated screen","Pizza oven & boma area","Staff quarters with bathroom","Crestron-style smart features","Heated pool & fire pit boma"],
+    location:"Exclusive cul-de-sac position directly on the golf course. Direct fairway views from master suite and all principal rooms. 5 minutes to the Copperleaf Clubhouse.",
+    ctx:`You are Alexandra, a luxury AI property concierge for Baroque Real Estate at Copperleaf Golf & Country Estate. You are presenting the Private Cul-de-Sac Golf Manor at R13.9M (Ref #7462835): 4 bed, 4 bath, 4 garages, 732m² on 1,505m² exclusive cul-de-sac erf directly on the golf course. Features: staff quarters, cinema room with automated screen, temperature-controlled wine room, pizza oven, boma with fire pit, walk-in fridge, underfloor heating, fireplace, solar, borehole. Levies R3,650/month. Bond approximately R139,000 per month. Listing agents Ronel Brashaw and Robyn Minards. If this home does not suit, suggest: Fairway Residence R6.2M (#7498497), Cinema & Gym R8.5M (#7452295), Greenbelt Home R4.8M (#7468601). Warm, elegant prose always. Never bullet points.`
+  },
+  {
+    id:2, name:"Modern Cinema & Gym Residence", price:"R 8,500,000", ref:"#7452295",
+    ytId:"JMCMbTwAkEM",
+    cover: BASE_IMG+'15065545.jpg',
+    images:[BASE_IMG+'15065545.jpg',BASE_IMG+'15065546.jpg',BASE_IMG+'15065547.jpg',BASE_IMG+'15065548.jpg',BASE_IMG+'15065549.jpg',BASE_IMG+'15065550.jpg'],
+    labels:['Exterior','Living Area','Kitchen','Cinema Room','Pool','Gym'],
+    desc:"A contemporary architectural statement with a dedicated home cinema, fully equipped private gym, and a chef's kitchen — designed for those who demand exceptional lifestyle facilities at home.",
+    tags:["Cinema Room","Gym","5 Bed","Modern"],
+    details:[{l:"Bedrooms",v:"5"},{l:"Bathrooms",v:"5"},{l:"Garages",v:"4"},{l:"Erf Size",v:"879 m²"},{l:"Floor Area",v:"600 m²"},{l:"Facing",v:"North"},{l:"Security",v:"24 Hour"},{l:"Levy",v:"R3,650/mo"}],
+    finishes:["Dedicated home cinema","Fully equipped private gym","Double-storey design","Pyjama lounge upstairs","Staff quarters","4 en-suite bedrooms","Guest toilet","North-facing orientation"],
+    location:"Set on an 879m² stand, north-facing. 3 minutes walk to the estate gym and tennis courts. 22 minutes to Sandton City. Soon-to-be completed — move in brand new.",
+    ctx:`You are Alexandra, a luxury AI property concierge for Baroque Real Estate at Copperleaf Golf & Country Estate. You are presenting the Modern Cinema & Gym Residence at R8.5M (Ref #7452295): 5 bed, 5 bath, 4 garages, 600m² on 879m² erf, north-facing, double storey. Features: dedicated home cinema, fully equipped private gym, pyjama lounge, staff quarters, 4 en-suite bedrooms, guest toilet, 24-hour security. Soon to be completed — brand new. Levies R3,650/month. Bond approximately R85,000 per month. If this home does not suit, suggest: Golf Manor R13.9M (#7462835), Fairway Residence R6.2M (#7498497), Greenbelt Home R4.8M (#7468601). Elegant prose always. Never bullet points.`
+  },
+  {
+    id:3, name:"Entertainer's Greenbelt Home", price:"R 4,800,000", ref:"#7468601",
+    ytId:"Zboutne85Mg",
+    cover: BASE_IMG+'15095843.jpg',
+    images:[BASE_IMG+'15095843.jpg',BASE_IMG+'15095844.jpg',BASE_IMG+'15095845.jpg',BASE_IMG+'15095846.jpg',BASE_IMG+'15095847.jpg',BASE_IMG+'15095848.jpg'],
+    labels:['Exterior','Living Area','Kitchen','Pool & Bar','Garden','Master Suite'],
+    desc:"Positioned on two tranquil greenbelts, this inviting 4-bedroom family home offers a wonderful balance of comfortable living and exceptional entertainment spaces in a peaceful natural setting.",
+    tags:["Greenbelt","4 Bed","Heated Pool","Braai Room"],
+    details:[{l:"Bedrooms",v:"4"},{l:"Bathrooms",v:"4"},{l:"Garages",v:"2"},{l:"Erf Size",v:"749 m²"},{l:"Floor Area",v:"304 m²"},{l:"Solar",v:"Yes"},{l:"Borehole",v:"Yes"},{l:"Levy",v:"R3,650/mo"}],
+    finishes:["Greenbelt backing — dual aspect","Heated pool with safety net","Built-in braai & bar room","Gas hob & gas oven","Granite kitchen countertops","Centre island kitchen","Staff quarters","Solar geyser & solar panels"],
+    location:"Positioned on two tranquil greenbelts within Copperleaf. Rare natural privacy — no rear neighbours. 10-minute walk to the clubhouse. 8 minutes to Centurion Mall.",
+    ctx:`You are Alexandra, a luxury AI property concierge for Baroque Real Estate at Copperleaf Golf & Country Estate. You are presenting the Entertainer's Greenbelt Home at R4.8M (Ref #7468601): 4 bed, 4 bath, 2 garages, 304m² on 749m² erf positioned on two greenbelts. Features: heated pool with safety net, built-in braai and bar room with TV port, gas hob and oven, granite countertops, centre island kitchen, staff quarters, solar geyser and solar panels, irrigation system, fibre. Levies R3,650/month. Bond approximately R48,000 per month. Listing agents Ronel Brashaw and Robyn Minards. If this home does not suit, suggest: Cinema & Gym R8.5M (#7452295), Fairway Residence R6.2M (#7498497), Golf Manor R13.9M (#7462835). Warm, elegant prose always. Never bullet points.`
+  }
+];
+
+let curId=null, listening=false, history=[];
+const SS=window.speechSynthesis;
+let recog=null;
+
+// Build sidebar
+const listingsEl=document.getElementById('listings');
+PROPS.forEach(p=>{
+  const d=document.createElement('div');
+  d.className='listing-item'; d.id='li-'+p.id;
+  d.innerHTML=`
+    <div class="li-thumb"><img src="${p.cover}" alt="${p.name}" onerror="this.parentNode.style.background='#1a1a1a'"/></div>
+    <div class="li-body">
+      <div class="li-ref">Ref ${p.ref}</div>
+      <div class="li-name">${p.name}</div>
+      <div class="li-price">${p.price}</div>
+      <div class="li-tags">${p.tags.map(t=>`<span class="li-tag">${t}</span>`).join('')}</div>
+      <div class="li-cta">Begin Virtual Tour <span class="li-arrow">→</span></div>
+    </div>`;
+  d.onclick=()=>openTour(p.id);
+  listingsEl.appendChild(d);
+});
+
+function openTour(id){
+  curId=id; history=[];
+  const p=PROPS[id];
+  document.querySelectorAll('.listing-item').forEach(el=>el.classList.remove('active'));
+  document.getElementById('li-'+id).classList.add('active');
+  document.getElementById('empty-state').style.display='none';
+  document.getElementById('tour-wrap').classList.add('active');
+
+  document.getElementById('tpb-name').textContent=p.name;
+  document.getElementById('tpb-meta').textContent=p.price+' · Ref '+p.ref;
+
+  // Video
+  const fr=document.getElementById('vid-frame');
+  const ph=document.getElementById('vid-ph');
+  if(p.ytId){
+    fr.src='https://www.youtube.com/embed/'+p.ytId+'?rel=0&modestbranding=1';
+    fr.style.display='block'; ph.style.display='none';
+  } else {
+    fr.src=''; fr.style.display='none'; ph.style.display='flex';
+  }
+  document.getElementById('vid-desc').textContent=p.desc;
+
+  // Gallery with real images
+  const gg=document.getElementById('gallery-grid');
+  gg.innerHTML=p.images.map((src,i)=>`
+    <div class="g-cell${i===0?' style="grid-column:span 3;aspect-ratio:16/6;"':''}">
+      <img src="${src}" alt="${p.labels[i]||''}" 
+        onerror="this.style.display='none';this.parentNode.style.background='#1a1a1a'"/>
+      <div class="g-cell-label">${p.labels[i]||''}</div>
+    </div>`).join('');
+
+  // Details
+  document.getElementById('det-grid').innerHTML=p.details.map(d=>`<div class="det-item"><label>${d.l}</label><span>${d.v}</span></div>`).join('');
+  document.getElementById('fin-list').innerHTML=p.finishes.map(f=>`<li>${f}</li>`).join('');
+  document.getElementById('loc-text').textContent=p.location;
+
+  // Other homes with images
+  document.getElementById('other-row').innerHTML=PROPS.filter(x=>x.id!==id).map(x=>`
+    <div class="o-card" onclick="openTour(${x.id})">
+      <img src="${x.cover}" alt="${x.name}" onerror="this.style.display='none'"/>
+      <div class="o-card-body"><span class="ocn">${x.name}</span><span class="ocp">${x.price}</span></div>
+    </div>`).join('');
+
+  // Chips
+  const cw=document.getElementById('chips-wrap');
+  cw.innerHTML='<p>Ask Alexandra</p>';
+  ['What are the monthly costs?','Tell me about the finishes','What is the estate like?','How is the security?','Suggest a similar home'].forEach(q=>{
+    const b=document.createElement('button'); b.className='chip'; b.textContent=q;
+    b.onclick=()=>quickAsk(q); cw.appendChild(b);
+  });
+
+  // Chat — Alexandra speaks first with a proper welcome
+  document.getElementById('chat-msgs').innerHTML='';
+  stopSpeak();
+  const welcome=`Good day, and welcome to the virtual show house for the ${p.name}, listed at ${p.price}. I am Alexandra, your personal property concierge for Baroque Real Estate. I am here to guide you through this home — feel free to ask me anything about the property, its finishes, the Copperleaf estate, or the surrounding area. I can also suggest other Baroque listings if this home is not quite right for you. Shall we begin with the video tour, or would you prefer to ask me something directly?`;
+  addMsg('a', welcome);
+  setTimeout(()=>speak(welcome), 600);
+
+  swTab('video', document.querySelector('.ttab'));
+}
+
+function swTab(name,el){
+  document.querySelectorAll('.ttab').forEach(t=>t.classList.remove('active'));
+  document.querySelectorAll('.pane').forEach(p=>p.classList.remove('active'));
+  if(el) el.classList.add('active');
+  document.getElementById('pane-'+name).classList.add('active');
+}
+
+function addMsg(role,text){
+  const c=document.getElementById('chat-msgs');
+  const d=document.createElement('div'); d.className='msg'+(role==='u'?' user':'');
+  d.innerHTML=`<div class="msg-av ${role}">${role==='u'?'Y':'A'}</div><div class="msg-bub">${text}</div>`;
+  c.appendChild(d); c.scrollTop=c.scrollHeight;
+}
+
+function addTyping(){
+  const c=document.getElementById('chat-msgs');
+  const d=document.createElement('div'); d.className='msg'; d.id='typing';
+  d.innerHTML=`<div class="msg-av a">A</div><div class="msg-bub" style="padding:13px 14px;"><div class="typing"><div class="t-dot"></div><div class="t-dot"></div><div class="t-dot"></div></div></div>`;
+  c.appendChild(d); c.scrollTop=c.scrollHeight; return d;
+}
+
+async function quickAsk(q){document.getElementById('chat-in').value=q; await sendMsg();}
+
+async function sendMsg(){
+  const inp=document.getElementById('chat-in');
+  const txt=inp.value.trim();
+  if(!txt||curId===null) return;
+  inp.value=''; addMsg('u',txt);
+  history.push({role:'user',content:txt});
+  const t=addTyping();
+  try{
+    const p=PROPS[curId];
+    const res=await fetch('https://api.anthropic.com/v1/messages',{
+      method:'POST',
+      headers:{
+        'Content-Type':'application/json',
+        'x-api-key':API_KEY,
+        'anthropic-version':'2023-06-01',
+        'anthropic-dangerous-direct-browser-access':'true'
+      },
+      body:JSON.stringify({model:'claude-sonnet-4-20250514',max_tokens:1000,system:p.ctx,messages:history.slice(-12)})
+    });
+    const data=await res.json();
+    t.remove();
+    if(data.content&&data.content[0]){
+      const reply=data.content[0].text;
+      history.push({role:'assistant',content:reply});
+      addMsg('a',reply); speak(reply);
+    } else {
+      addMsg('a','I apologise — there is a brief connection issue. Please try again in a moment.');
+    }
+  } catch(e){
+    t.remove();
+    addMsg('a','I apologise — there is a brief connection issue. Please try again in a moment.');
+  }
+}
+
+function handleKey(e){if(e.key==='Enter'&&!e.shiftKey){e.preventDefault();sendMsg();}}
+
+function speak(text){
+  if(!SS) return; SS.cancel();
+  const u=new SpeechSynthesisUtterance(text.substring(0,500));
+  u.rate=0.86; u.pitch=1.04; u.volume=0.9;
+  const voices=SS.getVoices();
+  const v=voices.find(v=>['Samantha','Karen','Moira','Tessa','Victoria'].some(n=>v.name.includes(n)))
+    ||voices.find(v=>v.lang==='en-ZA')
+    ||voices.find(v=>v.lang.startsWith('en'));
+  if(v) u.voice=v;
+  const stop=document.getElementById('vbtn-stop');
+  const btn=document.getElementById('vbtn');
+  stop.style.display='flex'; btn.style.display='none';
+  u.onend=()=>{stop.style.display='none';btn.style.display='flex';btn.classList.remove('speaking');};
+  btn.classList.add('speaking'); SS.speak(u);
+}
+
+function stopSpeak(){
+  if(SS) SS.cancel();
+  document.getElementById('vbtn-stop').style.display='none';
+  const b=document.getElementById('vbtn');
+  b.style.display='flex'; b.classList.remove('speaking','listening');
+}
+
+function toggleListen(){
+  if(!recog){
+    const SR=window.SpeechRecognition||window.webkitSpeechRecognition;
+    if(!SR){addMsg('a','Voice input is not supported in this browser. Please type your question below.');return;}
+    recog=new SR(); recog.continuous=false; recog.interimResults=false; recog.lang='en-ZA';
+    recog.onresult=e=>{document.getElementById('chat-in').value=e.results[0][0].transcript;sendMsg();};
+    recog.onend=()=>{
+      listening=false; const b=document.getElementById('vbtn'); b.classList.remove('listening');
+      b.innerHTML=`<svg width="11" height="11" viewBox="0 0 20 20" fill="currentColor"><path d="M10 1a3 3 0 0 0-3 3v6a3 3 0 0 0 6 0V4a3 3 0 0 0-3-3zm-5 9a5 5 0 0 0 10 0h-2a3 3 0 0 1-6 0H5zm4 5.9V18H8v-2.1a7 7 0 0 1-5.95-5.9h2.02A5 5 0 0 0 14.93 10H17a7 7 0 0 1-6 6.9V18h-2v-2.1z"/></svg> Speak to Alexandra`;
+    };
+    recog.onerror=()=>{listening=false;document.getElementById('vbtn').classList.remove('listening');};
+  }
+  if(listening){recog.stop();}
+  else{
+    listening=true; SS&&SS.cancel();
+    const b=document.getElementById('vbtn'); b.classList.add('listening');
+    b.innerHTML=`<svg width="11" height="11" viewBox="0 0 20 20" fill="currentColor"><path d="M10 1a3 3 0 0 0-3 3v6a3 3 0 0 0 6 0V4a3 3 0 0 0-3-3zm-5 9a5 5 0 0 0 10 0h-2a3 3 0 0 1-6 0H5zm4 5.9V18H8v-2.1a7 7 0 0 1-5.95-5.9h2.02A5 5 0 0 0 14.93 10H17a7 7 0 0 1-6 6.9V18h-2v-2.1z"/></svg> Listening…`;
+    recog.start();
+  }
+}
+
+if(SS){SS.onvoiceschanged=()=>SS.getVoices();SS.getVoices();}
+</script>
+</body>
+</html>
